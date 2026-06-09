@@ -600,8 +600,8 @@ const membersData = [
         "activities_debate": ""
     },
     {
-        "id": "계룡시",
-        "name": "계룡시",
+        "id": "윤재은",
+        "name": "윤재은",
         "constituency": "계룡시",
         "party": "더불어민주당",
         "gender": "여",

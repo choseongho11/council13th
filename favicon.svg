@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 금색 배경 원 (꽃잎 안쪽 채움) -->
+  <circle cx="32" cy="32" r="28" fill="#F5B800"/>
+
+  <!-- 꽃잎 범프 25개 (5그룹 × 5개) -->
+  <circle cx="41.1" cy="7.1"  r="6" fill="#F5B800"/>
+  <circle cx="36.6" cy="5.9"  r="6" fill="#F5B800"/>
+  <circle cx="32.0" cy="5.5"  r="6" fill="#F5B800"/>
+  <circle cx="27.4" cy="5.9"  r="6" fill="#F5B800"/>
+  <circle cx="22.9" cy="7.1"  r="6" fill="#F5B800"/>
+
+  <circle cx="11.1" cy="15.7" r="6" fill="#F5B800"/>
+  <circle cx="8.6"  cy="19.6" r="6" fill="#F5B800"/>
+  <circle cx="6.8"  cy="23.8" r="6" fill="#F5B800"/>
+  <circle cx="5.8"  cy="28.3" r="6" fill="#F5B800"/>
+  <circle cx="5.5"  cy="32.9" r="6" fill="#F5B800"/>
+
+  <circle cx="10.0" cy="46.8" r="6" fill="#F5B800"/>
+  <circle cx="12.9" cy="50.4" r="6" fill="#F5B800"/>
+  <circle cx="16.4" cy="53.4" r="6" fill="#F5B800"/>
+  <circle cx="20.4" cy="55.8" r="6" fill="#F5B800"/>
+  <circle cx="24.7" cy="57.5" r="6" fill="#F5B800"/>
+
+  <circle cx="39.3" cy="57.5" r="6" fill="#F5B800"/>
+  <circle cx="43.6" cy="55.8" r="6" fill="#F5B800"/>
+  <circle cx="47.6" cy="53.4" r="6" fill="#F5B800"/>
+  <circle cx="51.1" cy="50.4" r="6" fill="#F5B800"/>
+  <circle cx="54.0" cy="46.8" r="6" fill="#F5B800"/>
+
+  <circle cx="58.5" cy="32.9" r="6" fill="#F5B800"/>
+  <circle cx="58.2" cy="28.3" r="6" fill="#F5B800"/>
+  <circle cx="57.2" cy="23.8" r="6" fill="#F5B800"/>
+  <circle cx="55.4" cy="19.6" r="6" fill="#F5B800"/>
+  <circle cx="52.9" cy="15.7" r="6" fill="#F5B800"/>
+
+  <!-- 꽃잎 사이 그림자 테두리 (약간 어두운 금) -->
+  <circle cx="32" cy="32" r="27.5" fill="none" stroke="#D4950A" stroke-width="0.8" opacity="0.5"/>
+
+  <!-- 중앙 붉은 원 -->
+  <circle cx="32" cy="32" r="20" fill="#7B1515"/>
+
+  <!-- 붉은 원 안쪽 금색 테두리 링 -->
+  <circle cx="32" cy="32" r="19.2" fill="none" stroke="#F5B800" stroke-width="0.9"/>
+
+  <!-- 의회 텍스트 -->
+  <text x="32" y="38"
+        font-family="'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif"
+        font-size="15" font-weight="800"
+        fill="#F5B800"
+        text-anchor="middle">의회</text>
+</svg>

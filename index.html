@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제13대의회 의정활동 이력카드</title>
+    <link rel="icon" type="image/png" href="mark.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico" sizes="16x16 32x32 48x48 256x256">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Excel 파싱 라이브러리 (SheetJS) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="membersData.js"></script>
+</head>
+<body class="user-mode">
+
+    <!-- 시스템 로그인 화면 -->
+    <div id="loginScreen">
+        <div class="login-box">
+                <div class="login-emblem">
+                <img src="mark.png" alt="충청남도의회" onerror="this.style.display='none'">
+            </div>
+            <div class="login-title">충청남도의회</div>
+            <div class="login-subtitle">제13대의회 의원의정활동 이력카드</div>
+            <div class="login-form">
+                <label class="login-label">시스템 암호</label>
+                <input type="password" id="loginPassword" class="login-input" placeholder="암호를 입력하세요" onkeydown="if(event.key==='Enter') doLogin()">
+                <div id="loginError" class="login-error"></div>
+                <button class="login-btn" onclick="doLogin()">로그인</button>
+            </div>
+            <div class="login-footer">충청남도의회 의정활동 이력 관리 시스템</div>
+        </div>
+    </div>
+
+    <!-- 관리자 로그인 모달 -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 8px;">운영자 로그인</h3>
+            <p style="font-size: 13px; color: #666;">데이터 수정을 위해 암호를 입력하세요.</p>
+            <input type="password" id="adminPassword" placeholder="비밀번호" onkeyup="if(event.key === 'Enter') checkPassword()">
+            <div class="modal-btns">
+                <button class="btn btn-secondary" onclick="closeModal()">취소</button>
+                <button class="btn btn-primary" onclick="checkPassword()">로그인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 의원 수동 추가 모달 -->
+    <div id="addMemberModal" class="modal-overlay">
+        <div class="modal-content" style="width: 560px; max-width: 95%;">
+            <h3 style="margin-bottom: 6px; color:var(--primary); font-size:17px;">➕ 신규 의원 추가</h3>
+            <p style="font-size: 12px; color: #666; margin-bottom: 16px;">성명은 필수입니다. 나머지는 나중에 엑셀 업로드로 입력할 수 있습니다.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left;">
+                <div style="grid-column:1/-1;">
+                    <label style="font-size:12px;font-weight:bold;">성명 <span style="color:red;">*</span></label>
+                    <input type="text" id="newM_name" placeholder="예: 홍길동" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:bold;">선거구명</label>
+                    <input type="text" id="newM_constituency" placeholder="예: 천안1" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:bold;">소속정당</label>
+                    <input type="text" id="newM_party" placeholder="예: 국민의힘" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:bold;">성별</label>
+                    <select id="newM_gender" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                        <option value="">선택</option>
+                        <option value="남">남</option>
+                        <option value="여">여</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:bold;">생년월일</label>
+                    <input type="text" id="newM_birthDate" placeholder="예: 1975.03.12" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                </div>
+                <div style="grid-column:1/-1;">
+                    <label style="font-size:12px;font-weight:bold;">주소</label>
+                    <input type="text" id="newM_address" placeholder="주소 입력" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:bold;">학력</label>
+                    <input type="text" id="newM_education" placeholder="최종학력" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                </div>
+                <div style="grid-column:1/-1;">
+                    <label style="font-size:12px;font-weight:bold;">주요경력</label>
+                    <input type="text" id="newM_career" placeholder="주요경력 (엔터나 쉼표로 구분 없이 한 줄로 요약)" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:bold;">지역구</label>
+                    <input type="text" id="newM_region" placeholder="지역구 설명" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:bold;">13대 전반기 상임위</label>
+                    <input type="text" id="newM_committee1" placeholder="예: 상임위원회명" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:bold;">13대 후반기 상임위</label>
+                    <input type="text" id="newM_committee2" placeholder="예: 상임위원회명" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
+                </div>
+            </div>
+            <div class="modal-btns" style="margin-top:20px;">
+                <button class="btn btn-secondary" onclick="document.getElementById('addMemberModal').classList.remove('active');">취소</button>
+                <button class="btn btn-primary" onclick="addNewMemberFromModal()" style="background:#2563eb;">➕ 의원 추가</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 대량 데이터 엑셀 변환기 모달 -->
+    <div id="bulkGeneratorModal" class="modal-overlay">
+        <div class="modal-content bulk-modal-content" style="width: 800px; max-width: 95%;">
+            <h3 style="margin-bottom: 8px; color:var(--primary); font-size:18px;">📑 대량 데이터 엑셀 일괄 생성기</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.5; text-align:left;">
+                도의회 홈페이지 검색 결과를 각 항목에 복사해서 쏟아넣고 [업로드용 엑셀 다운로드]를 클릭하세요.<br>
+                모든 의원의 데이터가 이력카드 엑셀 서식에 맞게 자동 맵핑되어 통합 파일(.xlsx)로 추출됩니다. (신상정보 빈칸 유지)
+            </p>
+            <div class="bulk-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: left;">
+                <div><label style="font-size:13px; font-weight:bold;">📌 5분 발언</label><textarea id="bulkData_5min" placeholder="5분발언 리스트를 몽땅 복사+붙여넣기 하세요..."></textarea></div>
+                <div><label style="font-size:13px; font-weight:bold;">📌 도정 질문</label><textarea id="bulkData_question" placeholder="도정질문 리스트를 몽땅 복사+붙여넣기 하세요..."></textarea></div>
+                <div><label style="font-size:13px; font-weight:bold;">📌 대표발의 조례</label><textarea id="bulkData_bill" placeholder="대표발의조례 리스트를 몽땅 복사+붙여넣기 하세요..."></textarea></div>
+                <div><label style="font-size:13px; font-weight:bold;">📌 건의안/결의안</label><textarea id="bulkData_suggestion" placeholder="건의안 리스트를 몽땅 복사+붙여넣기 하세요..."></textarea></div>
+                <div style="grid-column: 1 / -1;"><label style="font-size:13px; font-weight:bold;">📌 의정 토론회</label><textarea id="bulkData_debate" style="height:80px;" placeholder="의정토론회 리스트를 복사+붙여넣기 하세요..."></textarea></div>
+                <div style="grid-column: 1 / -1;"><label style="font-size:13px; font-weight:bold;">📌 연구 모임</label><textarea id="bulkData_research" style="height:100px;" placeholder="연구모임 멀티라인 데이터를 복사+붙여넣기 하세요..."></textarea></div>
+                <div style="grid-column: 1 / -1;"><label style="font-size:13px; font-weight:bold;">📌 상임위원회 활동 (속기록 요약)</label><textarea id="bulkData_committee" style="height:100px;" placeholder="상임위 속기록 요약을 복사+붙여넣기 하세요..."></textarea></div>
+                <div style="grid-column: 1 / -1;"><label style="font-size:13px; font-weight:bold;">📌 행정사무감사 활동 (속기록 요약)</label><textarea id="bulkData_audit" style="height:100px;" placeholder="=== RECORD START ===&#10;[META]&#10;회기: ...&#10;의원명: ...&#10;회의명: ...&#10;일자: ...&#10;[SUMMARY]&#10;...&#10;[ORIGINAL]&#10;... 형식의 행정사무감사 속기록 요약을 복사+붙여넣기 하세요..."></textarea></div>
+            </div>
+            
+            <div class="modal-btns" style="margin-top:20px;">
+                <button class="btn btn-secondary" onclick="document.getElementById('bulkGeneratorModal').classList.remove('active');">취소</button>
+                <button class="btn btn-primary" onclick="generateBulkExcel()" style="background:#059669;">✨ 업로드용 엑셀파일 다운로드</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar no-print">
+        <h1></h1>
+        <div class="toolbar-btns">
+
+            <!-- 엑셀 컨트롤 유닛 (관리자 모드에서만 보임) -->
+            <div class="excel-controls admin-only" style="display:flex; align-items:center; gap:8px; border-right: 2px solid #E5E7EB; padding-right: 16px; margin-right: 4px;">
+                <button id="openBulkGeneratorBtn" class="btn btn-primary tooltip-btn" style="background:#059669; font-size: 13px;" onclick="document.getElementById('bulkGeneratorModal').classList.add('active');" title="웹 데이터를 이용해 엑셀 일괄 생성">
+                    📑 웹데이터 일괄 변환기
+                </button>
+                <button id="downloadTemplateBtn" class="btn btn-secondary" style="font-size: 13px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> 
+                    데이터 양식 다운로드
+                </button>
+                <label for="excelUpload" class="btn btn-primary" style="cursor: pointer; font-size: 13px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    엑셀 파일 업로드
+                </label>
+                <input type="file" id="excelUpload" accept=".xlsx, .xls" style="display: none;">
+                <label for="txtUpload" class="btn btn-primary" style="cursor: pointer; font-size: 13px; background:#7c3aed; border-color:#7c3aed;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    속기록 TXT 업로드
+                </label>
+                <input type="file" id="txtUpload" accept=".txt" multiple style="display: none;">
+                <button class="btn btn-secondary tooltip-btn" style="font-size:13px;" onclick="document.getElementById('addMemberModal').classList.add('active'); document.getElementById('newM_name').value=''; document.getElementById('newM_name').focus();" title="의원 목록에 새 의원 수동 추가">➕ 의원 추가</button>
+            </div>
+
+            <!-- 의원 선택 드롭다운 (누구나 사용 가능) -->
+            <div class="member-select-wrap" style="display:flex; align-items:center; gap:6px;">
+                <label for="memberSelect" style="font-size: 14px; font-weight: bold; color: var(--text-main);">열람 대상: </label>
+                <input type="text" id="memberSearch" placeholder="이름 검색" style="padding:5px 8px; border:1px solid #CCC; border-radius:4px; width:70px; font-size:13px;" title="이름을 입력하면 해당 의원으로 즉시 이동합니다">
+                <select id="memberSelect" class="btn" style="min-width: 150px; background:white; border:1px solid #CCC;">
+                    <option value="">의원을 선택하세요</option>
+                </select>
+                <button class="btn admin-only" id="deleteMemberBtn"
+                    onclick="deleteCurrentMember()"
+                    title="현재 선택된 의원 삭제"
+                    style="background:#ef4444; color:white; font-size:13px; padding:6px 10px; border:none; border-radius:6px; cursor:pointer;">
+                    🗑️ 삭제
+                </button>
+            </div>
+            
+            <button id="adminToggleBtn" class="btn btn-secondary" style="padding: 8px 12px; font-size:12px;">⚙️ 관리자</button>
+            <button id="saveEditsBtn" class="btn btn-primary admin-only tooltip-btn" onclick="saveCurrentEdits()" title="현재 화면에서 편집한 내용을 저장합니다." style="background:#f59e0b; border-color:#f59e0b; padding: 8px 12px; font-size:12px;">💾 변경사항 저장</button>
+            <button id="printBtn" class="btn btn-primary" style="padding: 8px 12px; font-size:12px;">PDF 파일 저장</button>
+
+            <!-- 위험 구역 (거의 안 쓰는 기능들) -->
+            <div class="danger-zone admin-only" style="margin-left: 10px; border-left: 1px solid #ddd; padding-left: 10px; display: flex; gap: 4px;">
+                <button id="clearActivitiesBtn" class="btn-danger-small" title="활동내역만 비우기">활동비우기</button>
+                <button id="resetBtn" class="btn-danger-small" title="전체 데이터 초기화">전체초기화</button>
+                <button id="exportJsBtn" class="btn-primary admin-only tooltip-btn" style="background:#10B981; border-color:#10B981; margin-left:10px; font-size:12px;" onclick="exportToMembersDataJs()" title="현재 모든 데이터를 membersData.js 파일로 추출하여 깃허브 배포용으로 사용합니다.">📤 배포파일(JS) 추출</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Card: Content area -->
+    <div class="document-container">
+        <div class="card" id="resumeCard">
+            
+            <div class="card-header">
+                <h1 class="card-title">충청남도의회 의원 의정활동 이력카드</h1>
+            </div>
+
+            <table class="profile-table">
+                <thead>
+                    <tr><th>선거구명</th><th>성 명</th><th>소속정당</th><th>성 별</th><th>생년월일</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="td-constituency"></td>
+                        <td id="td-name"></td>
+                        <td id="td-party"></td>
+                        <td id="td-gender"></td>
+                        <td id="td-birthDate"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="profile-photo-wrap">
+                <table class="profile-table no-top-border">
+                    <tbody>
+                        <tr><th>주 소</th><td id="td-address"></td></tr>
+                        <tr><th>학 력</th><td id="td-education"></td></tr>
+                        <tr><th>주요경력</th><td id="td-career"></td></tr>
+                        <tr><th>지역구</th><td id="td-region"></td></tr>
+                    </tbody>
+                </table>
+                <div class="photo-area" id="memberPhotoArea">
+                    <img id="memberPhoto" src="" alt="의원 사진" style="display:none;">
+                    <div id="memberPhotoPlaceholder">사진</div>
+                    <label for="memberPhotoUpload" class="photo-upload-btn admin-only no-print" title="사진 업로드">📷 업로드</label>
+                    <input type="file" id="memberPhotoUpload" accept="image/*" style="display:none;">
+                    <button class="photo-delete-btn admin-only no-print" id="memberPhotoDeleteBtn" style="display:none;">✕ 삭제</button>
+                </div>
+            </div>
+
+             <table class="profile-table">
+                <tbody>
+                    <tr>
+                        <th class="align-middle" rowspan="2" style="width:150px;">소 속<br>상임위</th>
+                        <th class="text-center" style="background:#fff; color:var(--text-main); border-bottom:none;">13대 전반기</th>
+                        <th class="text-center" style="background:#fff; color:var(--text-main); border-bottom:none;">13대 후반기</th>
+                    </tr>
+                    <tr>
+                         <td id="td-committee1" class="text-center font-semibold"></td>
+                         <td id="td-committee2" class="text-center font-semibold"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Plenary Activities -->
+            <div class="section-title-wrap">
+                <h2 class="section-title">&lt;본회의 활동&gt;</h2>
+                <button class="btn add-section-btn admin-only" onclick="addPlenarySection()">+ 빈 활동유형 추가</button>
+            </div>
+            
+            <div id="plenaryActivities"></div>
+            
+            <!-- Bill Sponsorship -->
+            <div id="billActivities"></div>
+            
+            <!-- Debates -->
+            <div id="debateActivities"></div>
+
+            <!-- Research Groups -->
+            <div id="researchActivities"></div>
+
+            <!-- Standing Committee Activities -->
+            <div class="section-title-wrap">
+                <h2 class="section-title">&lt;상임위원회 활동&gt;</h2>
+                <button class="btn add-section-btn admin-only" onclick="addCommitteeActivity()">+ 빈 활동회기 추가</button>
+            </div>
+            
+            <table class="committee-table">
+                <thead><tr><th class="col-session">구 분</th><th class="col-details">주요 내역</th></tr></thead>
+                <tbody id="committeeActivities"></tbody>
+            </table>
+
+            <!-- Administrative Audit Activities -->
+            <div class="section-title-wrap">
+                <h2 class="section-title">&lt;행정사무감사 활동&gt;</h2>
+                <button class="btn add-section-btn admin-only" onclick="addAuditActivity()">+ 빈 활동회기 추가</button>
+            </div>
+            
+            <table class="committee-table">
+                <thead><tr><th class="col-session">구 분</th><th class="col-details">주요 내역</th></tr></thead>
+                <tbody id="auditActivities"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

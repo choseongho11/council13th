@@ -175,18 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupAdminAuthLogic();
 
-    // Set Default if valid
-    if(activeMembers.length > 0) {
-        const firstMemberId = activeMembers[0].id;
-        document.getElementById('memberSelect').value = firstMemberId;
-        applyMemberData(firstMemberId);
-    } else {
-        // 의원이 아무도 없을 경우 화면 비우기
-        const fields = ['constituency','name','party','gender','birthDate','address','education','career','region','committee1','committee2'];
-        fields.forEach(f => { const el = document.getElementById(`td-${f}`); if(el) el.innerHTML = ''; });
-        document.getElementById('plenaryActivities').innerHTML = '';
-        document.getElementById('committeeActivities').innerHTML = '';
-    }
+    // 메인 화면은 항상 안내 페이지로 시작 (의원을 직접 선택해야 이력카드가 표시됨)
+    document.getElementById('memberSelect').value = '';
+    applyMemberData('');
 });
 
 // ----------------------------------------------------------------------------------
@@ -1071,7 +1062,26 @@ function showMemberPhoto(src) {
     }
 }
 
+// 왼쪽 상단 홈 버튼: 첫 안내 화면으로 이동
+function goHome() {
+    document.getElementById('memberSelect').value = '';
+    document.getElementById('memberSearch').value = '';
+    applyMemberData('');
+}
+
 function applyMemberData(id) {
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const resumeCard = document.getElementById('resumeCard');
+
+    // 의원 미선택 시 안내 화면 표시, 선택 시 이력카드 표시
+    if (!id) {
+        welcomeScreen.classList.remove('hidden');
+        resumeCard.classList.add('hidden');
+        return;
+    }
+    welcomeScreen.classList.add('hidden');
+    resumeCard.classList.remove('hidden');
+
     const plenaryContainer = document.getElementById('plenaryActivities');
     const billContainer = document.getElementById('billActivities');
     const debateContainer = document.getElementById('debateActivities');
@@ -1089,7 +1099,11 @@ function applyMemberData(id) {
     auditContainer.innerHTML = '';
 
     const member = activeMembers.find(m => m.id === id);
-    if (!member) return;
+    if (!member) {
+        welcomeScreen.classList.remove('hidden');
+        resumeCard.classList.add('hidden');
+        return;
+    }
 
     // 사진 로드 (member.photo 우선, 구버전 호환으로 localStorage 폴백)
     const savedPhoto = member.photo || localStorage.getItem(`memberPhoto_${id}`) || null;
@@ -1360,11 +1374,9 @@ function deleteCurrentMember() {
     saveToLocalStorage();
     renderDropdown();
 
-    // 카드 초기화
-    const fields = ['constituency','name','party','gender','birthDate','address','education','career','region','committee1','committee2'];
-    fields.forEach(f => { const el = document.getElementById(`td-${f}`); if(el) el.innerHTML = ''; });
-    document.getElementById('plenaryActivities').innerHTML = '';
-    document.getElementById('committeeActivities').innerHTML = '';
+    // 카드 초기화 → 안내 화면으로 복귀
+    select.value = '';
+    applyMemberData('');
 
     alert(`🗑️ '${member.name}' 의원이 삭제되었습니다.`);
 }

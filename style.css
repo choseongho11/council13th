@@ -158,8 +158,10 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    row-gap: 12px;
 }
 
 .toolbar h1 {
@@ -169,11 +171,20 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+}
+
+.toolbar h1:hover {
+    opacity: 0.7;
 }
 
 .toolbar-btns {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
+    row-gap: 8px;
     align-items: center;
 }
 
@@ -184,6 +195,105 @@ body {
     border-right: 1px solid var(--border-color);
     padding-right: 16px;
     margin-right: 4px;
+}
+
+/* ===== 관리자 도구 그룹 ===== */
+.admin-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 6px 12px 6px 6px;
+    margin-right: 6px;
+}
+
+.admin-toolbar-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748B;
+    background: #E2E8F0;
+    border-radius: 999px;
+    padding: 4px 10px;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+
+.admin-toolbar-label-danger {
+    color: #B91C1C;
+    background: #FEE2E2;
+}
+
+.btn-admin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 6px;
+    border: 1px solid #D6DCE5;
+    background: #FFFFFF;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.btn-admin:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.btn-admin-accent {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.btn-admin-accent:hover {
+    background: #16305f;
+    border-color: #16305f;
+    color: #fff;
+}
+
+.btn-admin-save {
+    background: #D97706;
+    border-color: #D97706;
+    color: #fff;
+}
+
+.btn-admin-save:hover {
+    background: #B45309;
+    border-color: #B45309;
+    color: #fff;
+}
+
+.btn-admin-danger {
+    background: #fff;
+    border-color: #FCA5A5;
+    color: #DC2626;
+    padding: 8px 12px;
+}
+
+.btn-admin-danger:hover {
+    background: #DC2626;
+    border-color: #DC2626;
+    color: #fff;
+}
+
+.danger-zone {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #FEF2F2;
+    border: 1px solid #FEE2E2;
+    border-radius: 10px;
+    padding: 6px 10px;
+    margin-left: 4px;
 }
 
 .btn {
@@ -232,6 +342,84 @@ body {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
+/* 메인 안내 화면 */
+.welcome-card {
+    background: var(--bg-card);
+    padding: 80px 60px;
+    border-radius: 8px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    text-align: center;
+}
+
+.welcome-card.hidden {
+    display: none;
+}
+
+.welcome-emblem {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.welcome-emblem img {
+    height: 64px;
+    width: auto;
+}
+
+.welcome-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -1px;
+    line-height: 1.4;
+    margin-bottom: 20px;
+}
+
+.welcome-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 40px;
+}
+
+.welcome-guide {
+    max-width: 560px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.welcome-guide-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    background: var(--primary-light);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.welcome-guide-num {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#resumeCard.hidden {
+    display: none;
+}
+
 /* Document Title */
 .card-header {
     text-align: center;
@@ -277,6 +465,10 @@ body {
     /* 윗 테두리 복구 */
 }
 
+.profile-table.no-top-border {
+    table-layout: fixed;
+}
+
 .profile-table.no-top-border th {
     text-align: center;
     width: 150px;
@@ -284,6 +476,8 @@ body {
 
 .profile-table.no-top-border td {
     text-align: left;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* 사진 영역 래퍼 */
@@ -360,6 +554,9 @@ body {
 @media print {
     .profile-photo-wrap {
         break-inside: avoid;
+    }
+    .welcome-card {
+        display: none !important;
     }
 }
 
@@ -657,36 +854,20 @@ body.user-mode .session-title-edit {
 
 /* Danger Zone Mini Buttons */
 .btn-danger-small {
-    font-size: 10px;
-    padding: 3px 8px;
-    color: #999;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 10px;
+    color: #B91C1C;
+    background: #fff;
+    border: 1px solid #FCA5A5;
+    border-radius: 6px;
     cursor: pointer;
     transition: var(--transition);
+    white-space: nowrap;
 }
 
 .btn-danger-small:hover {
-    background: #fee2e2;
-    color: #ef4444;
-    border-color: #fca5a5;
-}
-
-/* Danger Zone Mini Buttons */
-.btn-danger-small {
-    font-size: 10px;
-    padding: 3px 8px;
-    color: #999;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.btn-danger-small:hover {
-    background: #fee2e2;
-    color: #ef4444;
-    border-color: #fca5a5;
+    background: #DC2626;
+    color: #fff;
+    border-color: #DC2626;
 }

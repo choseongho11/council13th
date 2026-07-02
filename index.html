@@ -136,29 +136,32 @@
 
     <!-- Toolbar -->
     <div class="toolbar no-print">
-        <h1></h1>
+        <h1 id="homeBtn" onclick="goHome()" title="첫 화면으로 이동" style="cursor:pointer;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"></path><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"></path></svg>
+        </h1>
         <div class="toolbar-btns">
 
             <!-- 엑셀 컨트롤 유닛 (관리자 모드에서만 보임) -->
-            <div class="excel-controls admin-only" style="display:flex; align-items:center; gap:8px; border-right: 2px solid #E5E7EB; padding-right: 16px; margin-right: 4px;">
-                <button id="openBulkGeneratorBtn" class="btn btn-primary tooltip-btn" style="background:#059669; font-size: 13px;" onclick="document.getElementById('bulkGeneratorModal').classList.add('active');" title="웹 데이터를 이용해 엑셀 일괄 생성">
+            <div class="admin-toolbar-group admin-only">
+                <span class="admin-toolbar-label">관리자 도구</span>
+                <button id="openBulkGeneratorBtn" class="btn-admin btn-admin-accent tooltip-btn" onclick="document.getElementById('bulkGeneratorModal').classList.add('active');" title="웹 데이터를 이용해 엑셀 일괄 생성">
                     📑 웹데이터 일괄 변환기
                 </button>
-                <button id="downloadTemplateBtn" class="btn btn-secondary" style="font-size: 13px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> 
+                <button id="downloadTemplateBtn" class="btn-admin">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     데이터 양식 다운로드
                 </button>
-                <label for="excelUpload" class="btn btn-primary" style="cursor: pointer; font-size: 13px;">
+                <label for="excelUpload" class="btn-admin" style="cursor: pointer;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                     엑셀 파일 업로드
                 </label>
                 <input type="file" id="excelUpload" accept=".xlsx, .xls" style="display: none;">
-                <label for="txtUpload" class="btn btn-primary" style="cursor: pointer; font-size: 13px; background:#7c3aed; border-color:#7c3aed;">
+                <label for="txtUpload" class="btn-admin" style="cursor: pointer;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                     속기록 TXT 업로드
                 </label>
                 <input type="file" id="txtUpload" accept=".txt" multiple style="display: none;">
-                <button class="btn btn-secondary tooltip-btn" style="font-size:13px;" onclick="document.getElementById('addMemberModal').classList.add('active'); document.getElementById('newM_name').value=''; document.getElementById('newM_name').focus();" title="의원 목록에 새 의원 수동 추가">➕ 의원 추가</button>
+                <button class="btn-admin tooltip-btn" onclick="document.getElementById('addMemberModal').classList.add('active'); document.getElementById('newM_name').value=''; document.getElementById('newM_name').focus();" title="의원 목록에 새 의원 수동 추가">➕ 의원 추가</button>
             </div>
 
             <!-- 의원 선택 드롭다운 (누구나 사용 가능) -->
@@ -168,29 +171,53 @@
                 <select id="memberSelect" class="btn" style="min-width: 150px; background:white; border:1px solid #CCC;">
                     <option value="">의원을 선택하세요</option>
                 </select>
-                <button class="btn admin-only" id="deleteMemberBtn"
+                <button class="btn-admin btn-admin-danger admin-only" id="deleteMemberBtn"
                     onclick="deleteCurrentMember()"
-                    title="현재 선택된 의원 삭제"
-                    style="background:#ef4444; color:white; font-size:13px; padding:6px 10px; border:none; border-radius:6px; cursor:pointer;">
+                    title="현재 선택된 의원 삭제">
                     🗑️ 삭제
                 </button>
             </div>
-            
+
             <button id="adminToggleBtn" class="btn btn-secondary" style="padding: 8px 12px; font-size:12px;">⚙️ 관리자</button>
-            <button id="saveEditsBtn" class="btn btn-primary admin-only tooltip-btn" onclick="saveCurrentEdits()" title="현재 화면에서 편집한 내용을 저장합니다." style="background:#f59e0b; border-color:#f59e0b; padding: 8px 12px; font-size:12px;">💾 변경사항 저장</button>
+            <button id="saveEditsBtn" class="btn-admin btn-admin-save admin-only tooltip-btn" onclick="saveCurrentEdits()" title="현재 화면에서 편집한 내용을 저장합니다.">💾 변경사항 저장</button>
             <button id="printBtn" class="btn btn-primary" style="padding: 8px 12px; font-size:12px;">PDF 파일 저장</button>
 
             <!-- 위험 구역 (거의 안 쓰는 기능들) -->
-            <div class="danger-zone admin-only" style="margin-left: 10px; border-left: 1px solid #ddd; padding-left: 10px; display: flex; gap: 4px;">
+            <div class="danger-zone admin-only">
+                <span class="admin-toolbar-label admin-toolbar-label-danger">위험 구역</span>
                 <button id="clearActivitiesBtn" class="btn-danger-small" title="활동내역만 비우기">활동비우기</button>
                 <button id="resetBtn" class="btn-danger-small" title="전체 데이터 초기화">전체초기화</button>
-                <button id="exportJsBtn" class="btn-primary admin-only tooltip-btn" style="background:#10B981; border-color:#10B981; margin-left:10px; font-size:12px;" onclick="exportToMembersDataJs()" title="현재 모든 데이터를 membersData.js 파일로 추출하여 깃허브 배포용으로 사용합니다.">📤 배포파일(JS) 추출</button>
+                <button id="exportJsBtn" class="btn-admin tooltip-btn" onclick="exportToMembersDataJs()" title="현재 모든 데이터를 membersData.js 파일로 추출하여 깃허브 배포용으로 사용합니다.">📤 배포파일(JS) 추출</button>
             </div>
         </div>
     </div>
 
     <!-- Document Card: Content area -->
     <div class="document-container">
+
+        <!-- 메인 안내 화면 (의원 미선택 시 표시) -->
+        <div class="welcome-card" id="welcomeScreen">
+            <div class="welcome-emblem">
+                <img src="mark.png" alt="충청남도의회" onerror="this.style.display='none'">
+            </div>
+            <h1 class="welcome-title">충청남도의회 제13대의회<br>의원 의정활동 이력카드</h1>
+            <p class="welcome-desc">의원별 의정활동 이력을 열람할 수 있는 시스템입니다.<br>상단 <strong>"열람 대상"</strong> 드롭다운에서 의원을 선택하시면 이력카드가 표시됩니다.</p>
+            <div class="welcome-guide">
+                <div class="welcome-guide-item">
+                    <span class="welcome-guide-num">1</span>
+                    <span>상단 드롭다운에서 <strong>의원 이름</strong>을 선택하거나 검색창에 이름을 입력하세요.</span>
+                </div>
+                <div class="welcome-guide-item">
+                    <span class="welcome-guide-num">2</span>
+                    <span>선택한 의원의 신상정보와 의정활동 이력이 화면에 표시됩니다.</span>
+                </div>
+                <div class="welcome-guide-item">
+                    <span class="welcome-guide-num">3</span>
+                    <span>화면 상단의 <strong>"PDF 파일 저장"</strong> 버튼으로 이력카드를 인쇄하거나 저장할 수 있습니다.</span>
+                </div>
+            </div>
+        </div>
+
         <div class="card" id="resumeCard">
             
             <div class="card-header">
@@ -216,9 +243,8 @@
                 <table class="profile-table no-top-border">
                     <tbody>
                         <tr><th>주 소</th><td id="td-address"></td></tr>
-                        <tr><th>학 력</th><td id="td-education"></td></tr>
-                        <tr><th>주요경력</th><td id="td-career"></td></tr>
                         <tr><th>지역구</th><td id="td-region"></td></tr>
+                        <tr><th>학력사항</th><td id="td-education"></td></tr>
                     </tbody>
                 </table>
                 <div class="photo-area" id="memberPhotoArea">
@@ -229,6 +255,12 @@
                     <button class="photo-delete-btn admin-only no-print" id="memberPhotoDeleteBtn" style="display:none;">✕ 삭제</button>
                 </div>
             </div>
+
+            <table class="profile-table no-top-border">
+                <tbody>
+                    <tr><th>경력사항</th><td id="td-career"></td></tr>
+                </tbody>
+            </table>
 
              <table class="profile-table">
                 <tbody>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>제13대의회 의정활동 이력카드</title>
+    <title>의정활동 이력카드</title>
     <link rel="icon" type="image/png" href="mark.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico" sizes="16x16 32x32 48x48 256x256">
     <link rel="shortcut icon" href="favicon.ico">
@@ -11,7 +11,8 @@
     
     <!-- Excel 파싱 라이브러리 (SheetJS) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="membersData.js"></script>
+    <script src="membersData13.js"></script>
+    <script src="membersData12.js"></script>
 </head>
 <body class="user-mode">
 
@@ -22,7 +23,7 @@
                 <img src="mark.png" alt="충청남도의회" onerror="this.style.display='none'">
             </div>
             <div class="login-title">충청남도의회</div>
-            <div class="login-subtitle">제13대의회 의원의정활동 이력카드</div>
+            <div class="login-subtitle" id="loginSubtitleText">의원 의정활동 이력카드</div>
             <div class="login-form">
                 <label class="login-label">시스템 암호</label>
                 <input type="password" id="loginPassword" class="login-input" placeholder="암호를 입력하세요" onkeydown="if(event.key==='Enter') doLogin()">
@@ -93,11 +94,11 @@
                     <input type="text" id="newM_region" placeholder="지역구 설명" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
                 </div>
                 <div>
-                    <label style="font-size:12px;font-weight:bold;">13대 전반기 상임위</label>
+                    <label style="font-size:12px;font-weight:bold;" id="committee1Label">13대 전반기 상임위</label>
                     <input type="text" id="newM_committee1" placeholder="예: 상임위원회명" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
                 </div>
                 <div>
-                    <label style="font-size:12px;font-weight:bold;">13대 후반기 상임위</label>
+                    <label style="font-size:12px;font-weight:bold;" id="committee2Label">13대 후반기 상임위</label>
                     <input type="text" id="newM_committee2" placeholder="예: 상임위원회명" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;margin-top:4px;">
                 </div>
             </div>
@@ -164,6 +165,15 @@
                 <button class="btn-admin tooltip-btn" onclick="document.getElementById('addMemberModal').classList.add('active'); document.getElementById('newM_name').value=''; document.getElementById('newM_name').focus();" title="의원 목록에 새 의원 수동 추가">➕ 의원 추가</button>
             </div>
 
+            <!-- 대수 선택 드롭다운 (누구나 사용 가능) -->
+            <div class="gen-select-wrap" style="display:flex; align-items:center; gap:6px;">
+                <label for="genSelect" style="font-size: 14px; font-weight: bold; color: var(--text-main);">대 수: </label>
+                <select id="genSelect" class="btn" style="min-width: 110px; background:white; border:1px solid #CCC;">
+                    <option value="13">제13대의회</option>
+                    <option value="12">제12대의회</option>
+                </select>
+            </div>
+
             <!-- 의원 선택 드롭다운 (누구나 사용 가능) -->
             <div class="member-select-wrap" style="display:flex; align-items:center; gap:6px;">
                 <label for="memberSelect" style="font-size: 14px; font-weight: bold; color: var(--text-main);">열람 대상: </label>
@@ -200,7 +210,7 @@
             <div class="welcome-emblem">
                 <img src="mark.png" alt="충청남도의회" onerror="this.style.display='none'">
             </div>
-            <h1 class="welcome-title">충청남도의회 제13대의회<br>의원 의정활동 이력카드</h1>
+            <h1 class="welcome-title" id="welcomeTitleText">충청남도의회<br>의원 의정활동 이력카드</h1>
             <p class="welcome-desc">의원별 의정활동 이력을 열람할 수 있는 시스템입니다.<br>상단 <strong>"열람 대상"</strong> 드롭다운에서 의원을 선택하시면 이력카드가 표시됩니다.</p>
             <div class="welcome-guide">
                 <div class="welcome-guide-item">
@@ -266,8 +276,8 @@
                 <tbody>
                     <tr>
                         <th class="align-middle" rowspan="2" style="width:150px;">소 속<br>상임위</th>
-                        <th class="text-center" style="background:#fff; color:var(--text-main); border-bottom:none;">13대 전반기</th>
-                        <th class="text-center" style="background:#fff; color:var(--text-main); border-bottom:none;">13대 후반기</th>
+                        <th class="text-center" id="committeeHeader1" style="background:#fff; color:var(--text-main); border-bottom:none;">13대 전반기</th>
+                        <th class="text-center" id="committeeHeader2" style="background:#fff; color:var(--text-main); border-bottom:none;">13대 후반기</th>
                     </tr>
                     <tr>
                          <td id="td-committee1" class="text-center font-semibold"></td>

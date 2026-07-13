@@ -1,5 +1,16 @@
 let activeMembers = [];
 let isAdmin = false;
+let currentGeneration = '13';
+
+// 현재 선택된 대수에 해당하는 내장 데이터 배열/버전을 반환
+function getGenMembersData() {
+    if (currentGeneration === '12') return typeof membersData12 !== 'undefined' ? membersData12 : [];
+    return typeof membersData13 !== 'undefined' ? membersData13 : [];
+}
+function getGenVersion() {
+    if (currentGeneration === '12') return typeof MEMBERS_DATA_VERSION_12 !== 'undefined' ? MEMBERS_DATA_VERSION_12 : null;
+    return typeof MEMBERS_DATA_VERSION_13 !== 'undefined' ? MEMBERS_DATA_VERSION_13 : null;
+}
 
 // 날짜 포맷 정규화: 2026-02-03 → 2026.02.03
 function formatDate(raw) {
@@ -26,15 +37,17 @@ function doLogin() {
     }
 }
 
-const LS_KEY = 'councilMembersData_v1';
-const LS_VER_KEY = 'councilMembersData_version';
+// 대수별로 격리된 localStorage 키 (13대/12대 데이터가 서로 덮어쓰지 않도록)
+function getLSKey() { return 'councilMembersData_v1_gen' + currentGeneration; }
+function getLSVerKey() { return 'councilMembersData_version_gen' + currentGeneration; }
 
 // localStorage에 현재 의원 데이터 저장 (버전 정보 함께 저장)
 function saveToLocalStorage() {
     try {
-        localStorage.setItem(LS_KEY, JSON.stringify(activeMembers));
-        if (typeof MEMBERS_DATA_VERSION !== 'undefined') {
-            localStorage.setItem(LS_VER_KEY, MEMBERS_DATA_VERSION);
+        localStorage.setItem(getLSKey(), JSON.stringify(activeMembers));
+        const ver = getGenVersion();
+        if (ver) {
+            localStorage.setItem(getLSVerKey(), ver);
         }
     } catch(err) {
         console.warn('localStorage 저장 실패:', err);
@@ -42,21 +55,21 @@ function saveToLocalStorage() {
 }
 
 // localStorage에서 의원 데이터 불러오기 (있으면 true 반환)
-// membersData.js의 버전이 다르면 localStorage 캐시를 무효화하고 false 반환
+// membersData 파일의 버전이 다르면 localStorage 캐시를 무효화하고 false 반환
 function loadFromLocalStorage() {
     try {
-        const currentVer = typeof MEMBERS_DATA_VERSION !== 'undefined' ? MEMBERS_DATA_VERSION : null;
-        const savedVer = localStorage.getItem(LS_VER_KEY);
+        const currentVer = getGenVersion();
+        const savedVer = localStorage.getItem(getLSVerKey());
 
         if (currentVer && savedVer !== currentVer) {
-            // 버전 불일치 → 캐시 삭제 후 membersData.js 우선 사용
-            console.info(`[데이터 업데이트] localStorage 버전(${savedVer}) → membersData.js 버전(${currentVer})으로 교체합니다.`);
-            localStorage.removeItem(LS_KEY);
-            localStorage.removeItem(LS_VER_KEY);
+            // 버전 불일치 → 캐시 삭제 후 내장 데이터 우선 사용
+            console.info(`[데이터 업데이트] localStorage 버전(${savedVer}) → 내장 데이터 버전(${currentVer})으로 교체합니다.`);
+            localStorage.removeItem(getLSKey());
+            localStorage.removeItem(getLSVerKey());
             return false;
         }
 
-        const saved = localStorage.getItem(LS_KEY);
+        const saved = localStorage.getItem(getLSKey());
         if (saved) {
             const parsed = JSON.parse(saved);
             if (Array.isArray(parsed) && parsed.length > 0) {
@@ -71,12 +84,19 @@ function loadFromLocalStorage() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // localStorage 우선 → 없으면 기본 membersData.js 사용
+    // 마지막으로 보던 대수를 기억 (없으면 13대 기본값)
+    const savedGen = localStorage.getItem('lastGeneration');
+    currentGeneration = (savedGen === '12' || savedGen === '13') ? savedGen : '13';
+    document.getElementById('genSelect').value = currentGeneration;
+    updateGenerationLabels();
+
+    // localStorage 우선 → 없으면 기본 내장 데이터 사용
     if (!loadFromLocalStorage()) {
-        if (typeof membersData !== 'undefined') activeMembers = [...membersData];
+        activeMembers = [...getGenMembersData()];
     }
     renderDropdown();
 
+    document.getElementById('genSelect').addEventListener('change', (e) => switchGeneration(e.target.value));
     document.getElementById('excelUpload').addEventListener('change', handleExcelUpload);
     document.getElementById('txtUpload').addEventListener('change', handleTxtUpload);
     document.getElementById('downloadTemplateBtn').addEventListener('click', downloadExcelTemplate);
@@ -141,8 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const pw = prompt('보안을 위해 관리자 비밀번호를 입력해주세요.\n(전체 데이터가 초기화되며 기본 데이터로 복구됩니다.)');
         if (pw === 'admin1234') {
             if(confirm('정말로 전체 초기화를 진행하시겠습니까?\n업로드된 모든 데이터가 삭제되고 기본 내장 데이터로 돌아갑니다.')) {
-                localStorage.removeItem(LS_KEY);
-                localStorage.removeItem(LS_VER_KEY);
+                localStorage.removeItem(getLSKey());
+                localStorage.removeItem(getLSVerKey());
                 location.reload();
             }
         } else if (pw !== null) {
@@ -731,7 +751,7 @@ function toggleEditability(canEdit) {
 function getExcelHeaders(maxSComs = 5, maxAudits = 5) {
     const baseHeaders = [
         "성명", "선거구명", "소속정당", "성별", "생년월일", "주소", "학력", "주요경력", "지역구",
-        "13대전반기상임위", "13대후반기상임위",
+        `${currentGeneration}대전반기상임위`, `${currentGeneration}대후반기상임위`,
         "5분발언", "도정질문", "조례안 대표발의", "건의안 및 결의안", "의정토론회", "연구모임"
     ];
     for (let i = 1; i <= maxSComs; i++) {
@@ -788,8 +808,8 @@ function handleExcelUpload(e) {
                 id: row["성명"], name: row["성명"], constituency: row["선거구명"], party: row["소속정당"],
                 gender: row["성별"], birthDate: row["생년월일"], address: row["주소"], education: row["학력"],
                 career: row["주요경력"], region: row["지역구"],
-                committee1: row["13대전반기상임위"] || row["전반기상임위"],
-                committee2: row["13대후반기상임위"] || row["후반기상임위"],
+                committee1: row[`${currentGeneration}대전반기상임위`] || row["전반기상임위"],
+                committee2: row[`${currentGeneration}대후반기상임위`] || row["후반기상임위"],
                 activities_5min:       row["5분발언"],
                 activities_question:   row["도정질문"],
                 activities_bill:       row["조례안 대표발의"] || row["대표발의조례"],
@@ -1067,6 +1087,39 @@ function goHome() {
     document.getElementById('memberSelect').value = '';
     document.getElementById('memberSearch').value = '';
     applyMemberData('');
+}
+
+// 대수(13대/12대)에 따라 바뀌는 화면 문구 갱신
+function updateGenerationLabels() {
+    const gen = currentGeneration;
+    document.title = `의정활동 이력카드`;
+    const loginSubtitle = document.getElementById('loginSubtitleText');
+    if (loginSubtitle) loginSubtitle.textContent = `의원 의정활동 이력카드`;
+    const welcomeTitle = document.getElementById('welcomeTitleText');
+    if (welcomeTitle) welcomeTitle.innerHTML = `충청남도의회<br>의원 의정활동 이력카드`;
+    const committeeHeader1 = document.getElementById('committeeHeader1');
+    if (committeeHeader1) committeeHeader1.textContent = `${gen}대 전반기`;
+    const committeeHeader2 = document.getElementById('committeeHeader2');
+    if (committeeHeader2) committeeHeader2.textContent = `${gen}대 후반기`;
+    const committee1Label = document.getElementById('committee1Label');
+    if (committee1Label) committee1Label.textContent = `${gen}대 전반기 상임위`;
+    const committee2Label = document.getElementById('committee2Label');
+    if (committee2Label) committee2Label.textContent = `${gen}대 후반기 상임위`;
+}
+
+// 대수 전환: 활성 데이터셋/localStorage 키/화면 문구를 모두 전환된 대수 기준으로 교체
+function switchGeneration(gen) {
+    if (gen !== '12' && gen !== '13') return;
+    currentGeneration = gen;
+    try { localStorage.setItem('lastGeneration', gen); } catch(err) {}
+
+    if (!loadFromLocalStorage()) {
+        activeMembers = [...getGenMembersData()];
+    }
+
+    updateGenerationLabels();
+    renderDropdown();
+    goHome();
 }
 
 function applyMemberData(id) {
@@ -1464,21 +1517,26 @@ function saveCurrentEdits() {
  * 현재 모든 의원 데이터를 membersData.js 형식으로 추출 (배포용)
  */
 function exportToMembersDataJs() {
-    if (!confirm('현재 화면의 모든 의원 데이터를 membersData.js 파일로 추출하시겠습니까?\n이 파일을 깃허브의 기존 파일과 교환하면 모든 사용자에게 동일한 데이터가 보입니다.')) return;
-    
+    const gen = currentGeneration;
+    const fileName = `membersData${gen}.js`;
+    const varName = `membersData${gen}`;
+    const verName = `MEMBERS_DATA_VERSION_${gen}`;
+
+    if (!confirm(`현재 화면의 모든 의원 데이터(제${gen}대의회)를 ${fileName} 파일로 추출하시겠습니까?\n이 파일을 깃허브의 기존 파일과 교환하면 모든 사용자에게 동일한 데이터가 보입니다.`)) return;
+
     // membersData 변수 선언문 형식으로 직렬화 (버전 상수 포함)
     const version = new Date().toISOString().slice(0, 19).replace('T', '_');
-    const content = `// ※ GitHub 배포 후 membersData.js가 반영되지 않을 경우, 아래 버전 값을 변경하세요.\n//   localStorage 캐시가 자동으로 무효화되고 이 파일의 데이터가 우선 적용됩니다.\nconst MEMBERS_DATA_VERSION = "${version}";\n\nconst membersData = ${JSON.stringify(activeMembers, null, 4)};`;
-    
+    const content = `// ※ GitHub 배포 후 ${fileName}가 반영되지 않을 경우, 아래 버전 값을 변경하세요.\n//   localStorage 캐시가 자동으로 무효화되고 이 파일의 데이터가 우선 적용됩니다.\nconst ${verName} = "${version}";\n\nconst ${varName} = ${JSON.stringify(activeMembers, null, 4)};`;
+
     const blob = new Blob([content], { type: 'text/javascript' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'membersData.js';
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
-    alert('membersData.js 파일이 다운로드되었습니다.\n이 파일을 깃허브 저장소에 업로드하시면 동기화가 완료됩니다.');
+
+    alert(`${fileName} 파일이 다운로드되었습니다.\n이 파일을 깃허브 저장소에 업로드하시면 동기화가 완료됩니다.`);
 }

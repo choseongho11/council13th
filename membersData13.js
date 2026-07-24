@@ -1,6 +1,6 @@
 // ※ GitHub 배포 후 membersData13.js가 반영되지 않을 경우, 아래 버전 값을 변경하세요.
 //   localStorage 캐시가 자동으로 무효화되고 이 파일의 데이터가 우선 적용됩니다.
-const MEMBERS_DATA_VERSION_13 = "2026-07-24_07:46:52";
+const MEMBERS_DATA_VERSION_13 = "2026-07-24_08:07:59";
 
 const membersData13 = [
     {
